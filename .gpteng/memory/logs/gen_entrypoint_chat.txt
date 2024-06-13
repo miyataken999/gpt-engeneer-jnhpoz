@@ -1,0 +1,130 @@
+
+2024-06-13T15:31:05.069386
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: Structure
+1 api/
+2 app/
+3 __init__.py
+4 app.py
+5 models/
+6 __init__.py
+7 user.py
+8 routes/
+9 __init__.py
+10 user.py
+11 tests/
+12 __init__.py
+13 test_user.py
+14 requirements.txt
+
+File: requirements.txt
+1 Flask==2.0.1
+2 pytest==6.2.5
+
+File: app/__init__.py
+1 # empty file
+
+File: app/app.py
+1 from flask import Flask, jsonify
+2 from routes.user import user_blueprint
+3 
+4 app = Flask(__name__)
+5 app.register_blueprint(user_blueprint)
+6 
+7 @app.route('/')
+8 def index():
+9     return 'Welcome to the API!'
+
+File: models/__init__.py
+1 # empty file
+
+File: models/user.py
+1 from dataclasses import dataclass
+2 
+3 @dataclass
+4 class User:
+5     id: int
+6     name: str
+7     email: str
+
+File: routes/__init__.py
+1 # empty file
+
+File: routes/user.py
+1 from flask import Blueprint, request, jsonify
+2 from models.user import User
+3 
+4 user_blueprint = Blueprint('user', __name__)
+5 
+6 @user_blueprint.route('/users', methods=['GET'])
+7 def get_users():
+8     users = [User(1, 'John Doe', 'john@example.com'), User(2, 'Jane Doe', 'jane@example.com')]
+9     return jsonify([user.__dict__ for user in users])
+10 
+11 @user_blueprint.route('/users/<int:user_id>', methods=['GET'])
+12 def get_user(user_id):
+13     user = User(user_id, 'John Doe', 'john@example.com')
+14     return jsonify(user.__dict__)
+
+File: tests/__init__.py
+1 # empty file
+
+File: tests/test_user.py
+1 import pytest
+2 from app import app
+3 
+4 @pytest.fixture
+5 def client():
+6     with app.test_client() as client:
+7         yield client
+8 
+9 def test_get_users(client):
+10     response = client.get('/users')
+11     assert response.status_code == 200
+12     assert len(response.json) == 2
+13 
+14 def test_get_user(client):
+15     response = client.get('/users/1')
+16     assert response.status_code == 200
+17     assert response.json['id'] == 1
+18     assert response.json['name'] == 'John Doe'
+19     assert response.json['email'] == 'john@example.com'
+
+```
+
+================================== Ai Message ==================================
+
+Here is the Unix script that installs dependencies and runs the codebase:
+```
+#!/bin/bash
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the API
+python app/app.py &
+
+# Run tests in parallel
+pytest tests/ &
+wait
+```
+Save this script to a file (e.g. `run.sh`), make it executable with `chmod +x run.sh`, and then run it with `./run.sh`.
